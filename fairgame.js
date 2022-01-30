@@ -5,7 +5,7 @@
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
-// @match        http://www.kaliburg.de:11235/
+// @include      *kaliburg.de*
 // @icon         https://www.google.com/s2/favicons?domain=kaliburg.de
 // @grant        none
 // @license      MIT
