@@ -273,28 +273,6 @@ function updateLadder() {
     showButtons();
 }
 
-function updateChat() {
-    let body = $('#messagesBody')[0];
-    body.innerHTML = "";
-    let msg = chatData.messages.reverse();
-    for (let i = 0; i < msg.length; i++) {
-        let message = msg[i];
-        let row = body.insertRow();
-        row.style.backgroundColor = (i % 2 == 0 ? "#efefef" : "")
-        let assholeTag = (message.timesAsshole < infoData.assholeTags.length) ?
-            infoData.assholeTags[message.timesAsshole] : infoData.assholeTags[infoData.assholeTags.length - 1];
-        row.insertCell(0).innerHTML = message.username + ": " + assholeTag;
-        row.cells[0].classList.add('overflow-hidden')
-        row.cells[0].style.whiteSpace = 'nowrap';
-        row.insertCell(1).innerHTML = "&nbsp;" + message.message;
-    }
-}
-
-function cleanChat() {
-    chatData.messages = [messageTemplate]
-    updateChat();
-}
-
 function showButtons() {
     let biasButton = $('#biasButton');
     let multiButton = $('#multiButton');
@@ -407,10 +385,6 @@ addJS_Node(showButtons);
 addJS_Node(updateLadder);
 addJS_Node(writeNewRow);
 
-// Overwrite chat
-addJS_Node(updateChat);
-addJS_Node(cleanChat);
-
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
 $(".navbar-toggler")[0].style['width'] = "5%";
@@ -430,9 +404,6 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`);
-
-// Add button for clearing chat
-$("#messagesBody").parent().append(`<button class="col-12 btn btn-outline-dark btn shadow-none text-center" id="cleanChat" onclick="cleanChat()">Clear</button>`)
 
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
