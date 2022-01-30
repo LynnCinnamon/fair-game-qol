@@ -405,9 +405,6 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`);
 
-// Add button for clearing chat
-$("#messagesBody").parent().append(`<button class="col-12 btn btn-outline-dark btn shadow-none text-center" id="cleanChat" onclick="cleanChat()">Clear</button>`)
-
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
 if (qolOptions.printFillerRows) { $("#printFillerRows").attr("checked", "checked"); }
