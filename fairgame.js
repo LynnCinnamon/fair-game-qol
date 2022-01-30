@@ -290,6 +290,11 @@ function updateChat() {
     }
 }
 
+function cleanChat() {
+    chatData.messages = [messageTemplate]
+    updateChat();
+}
+
 function showButtons() {
     let biasButton = $('#biasButton');
     let multiButton = $('#multiButton');
@@ -402,6 +407,10 @@ addJS_Node(showButtons);
 addJS_Node(updateLadder);
 addJS_Node(writeNewRow);
 
+// Overwrite chat
+addJS_Node(updateChat);
+addJS_Node(cleanChat);
+
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
 $(".navbar-toggler")[0].style['width'] = "5%";
@@ -409,13 +418,21 @@ $(`<button aria-controls="offcanvasNavbar" class="navbar-toggler" data-bs-target
 $("#offcanvasNavbar").clone().attr("id", "offcanvasOptions").width("400px").insertAfter("#offcanvasNavbar");
 $("#offcanvasOptions").children(".offcanvas-header").children("#offcanvasNavbarLabel").html("Options");
 $("#offcanvasOptions").children(".offcanvas-body").children().remove();
-$("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Font</span><select name="fonts" id="ladderFonts" class="form-select"><option value="">Default</option><option value="BenchNine">BenchNine</option></select></div>`+
+$("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Font</span><select name="fonts" id="ladderFonts" class="form-select">
+                       <option value="">Default</option>
+                       <option value="BenchNine">BenchNine</option>
+                       <option value="Roboto">Roboto</option>
+                       <option value="Lato">Lato</option>
+                       </select></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="2" placeholder="# of rows, min 10" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`);
+
+// Add button for clearing chat
+$("#messagesBody").parent().append(`<button class="col-12 btn btn-outline-dark btn shadow-none text-center" id="cleanChat" onclick="cleanChat()">Clear</button>`)
 
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
@@ -473,9 +490,18 @@ document.body.appendChild(linkTag);
 
 document.querySelector("#ladderFonts").addEventListener('change',function(){
     var input = document.querySelector("#ladderFonts").value;
-    if (input == "BenchNine") {
-        $("table.table.table-sm.caption-top.table-borderless").css("font-family","'BenchNine', sans-serif");
-    } else {
-        $("table.table.table-sm.caption-top.table-borderless").css("font-family","");
+    switch (input) {
+        case "BenchNine":
+            $("table.table.table-sm.caption-top.table-borderless").css("font-family","'BenchNine', sans-serif");
+            break;
+        case "Roboto":
+            $("table.table.table-sm.caption-top.table-borderless").css("font-family","'Roboto', sans-serif");
+            break;
+        case "Lato":
+            $("table.table.table-sm.caption-top.table-borderless").css("font-family","'Lato', sans-serif");
+            break;
+        default:
+            $("table.table.table-sm.caption-top.table-borderless").css("font-family","");
+            break;
     }
 });
