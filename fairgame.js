@@ -494,7 +494,7 @@ document.querySelector("#ladderFonts").addEventListener('change',function(){
         case "BenchNine":
             $("table.table.table-sm.caption-top.table-borderless").css("font-family","'BenchNine', sans-serif");
             break;
-        case "BenchNine":
+        case "Roboto":
             $("table.table.table-sm.caption-top.table-borderless").css("font-family","'Roboto', sans-serif");
             break;
         case "Lato":
