@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.380
+// @version      0.381
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -232,7 +232,7 @@ function updateLadder() {
     }
     $('#infoText').html(`<p>Grapes: ${numberFormatter.format(ladderData.yourRanker.grapes)}<\p>`+
                         `<p>${tag1} Vinegar:  ${numberFormatter.format(ladderData.yourRanker.vinegar)}/${numberFormatter.format(getVinegarThrowCost())} (+${numberFormatter.format(ladderData.yourRanker.grapes)} per/s) ${tag2}<\p>`+
-                        `<p>There is ${grapesTimeLeft} left until you can autopromote rank #1, fills per hour: ` + fillsPerHour.toFixed(2) + "<\p><p><br><br><br><\p>");
+                        `<p>There is ${grapesTimeLeft} left until you can throw vinegar at #1, fills per hour: ` + fillsPerHour.toFixed(2) + "<\p><p><br><br><br><\p>");
 
     $('#usernameLink').html(ladderData.yourRanker.username);
     $('#usernameText').html("+" + ladderData.yourRanker.bias + "   x" + ladderData.yourRanker.multiplier);
