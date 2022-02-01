@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.381
+// @version      0.382
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -34,6 +34,13 @@ window.qolOptions = {
   printFillerRows: false,
   scrollableTable: false,
   promotePoints: true,
+  multiLeader: {
+    "default": "Both", // <--- Change this value to save between refreshs
+    "Disabled": false,
+    "Both": "[NUMBER xSTATUS]",
+    "Square": "[xSTATUS]",
+    "Number": "[NUMBER]",
+  },
 }
 
 //////////////////////////////////////
@@ -171,10 +178,17 @@ function writeNewRow(body, ranker) {
     let rank = (ranker.rank === 1 && !ranker.you && ranker.growing && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) &&
             ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
         '<a href="#" style="text-decoration: none" onclick="throwVinegar()">🍇</a>' : ranker.rank;
+    
+    let multiPrice = ""
+    if ((ranker.rank === 1 && ranker.growing) && qolOptions.multiLeader[$("#leadermultimode")[0].value]) {
+        multiPrice = qolOptions.multiLeader[$("#leadermultimode")[0].value]
+        .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
+        .replace("STATUS", `${(ranker.points >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
+    }
     row.insertCell(0).innerHTML = rank + assholeTag;
     row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}] ${ranker.username}`+timeToFirst;
     row.cells[1].style.overflow = "hidden";
-    row.insertCell(2).innerHTML = `${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
+    row.insertCell(2).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[2].classList.add('text-end');
     row.insertCell(3).innerHTML = `${timeLeft}${numberFormatter.format(ranker.points)}`;
     row.cells[3].classList.add('text-end');
@@ -403,7 +417,13 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`);
+                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
+                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Power Requirements</span><select name="selector1" id="leadermultimode" class="form-select">
+                       <option value="Both">[524288 x🟩]</option>
+                       <option value="Square">[x🟩 / x🟥]</option>
+                       <option value="Number">[524288]</option>
+                       <option value="Disabled">Disabled</option>
+                       </select></div>`);
 
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
@@ -415,6 +435,7 @@ if (qolOptions.scrollableTable) {
 if (qolOptions.promotePoints) {
   $("#promotePoints").attr("checked", "checked");
 }
+$("#leadermultimode")[0].value = qolOptions.multiLeader["default"]
 
 $("#expandLadderSize")[0].addEventListener("change", (event)=>{
     if ($("#expandLadderSize")[0].checked) {
