@@ -183,7 +183,7 @@ function writeNewRow(body, ranker) {
     if ((ranker.rank === 1 && ranker.growing) && qolOptions.multiLeader[$("#leadermultimode")[0].value]) {
         multiPrice = qolOptions.multiLeader[$("#leadermultimode")[0].value]
         .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
-        .replace("STATUS", `${(ranker.points >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
+        .replace("STATUS", `${(ranker.power >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
     }
     row.insertCell(0).innerHTML = rank + assholeTag;
     row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}] ${ranker.username}`+timeToFirst;
