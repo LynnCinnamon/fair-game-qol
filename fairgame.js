@@ -412,6 +412,7 @@ function expandLadder() {
 
 addJS_Node(secondsToHms);
 addJS_Node(solveQuadratic);
+addJS_Node(expandLadder);
 addJS_Node(setLadderRows);
 addJS_Node(getAcc);
 // Overwrite original functions
