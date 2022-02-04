@@ -418,7 +418,7 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Power Requirements</span><select name="selector1" id="leadermultimode" class="form-select">
+                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Multi Requirement</span><select name="selector1" id="leadermultimode" class="form-select">
                        <option value="Both">[524288 x🟩]</option>
                        <option value="Square">[x🟩 / x🟥]</option>
                        <option value="Number">[524288]</option>
