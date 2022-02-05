@@ -86,17 +86,19 @@ $('body').css("line-height", 1);
 clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 
 function addTableColumns() {
-    $("#ladderBody").parent().find("thead").html(`<tr class="thead-light">
-                                                    <th>#</th>
-                                                    <th>Stats</th>
-                                                    <th>Username</th>
-                                                    <th class="text-end">Power</th>
-                                                    <th>ETA to #1</th>
-                                                    <th>ETA to You</th>
-                                                    <th class="text-end">Points</th>
-                                                </tr>`)
+    $("#ladderBody").parent().find("thead").html(`
+        <tr class="thead-light">
+            <th>#</th>
+            <th>Stats</th>
+            <th>Username</th>
+            <th class="text-end">Power</th>
+            <th>ETA to #1</th>
+            <th>ETA to You</th>
+            <th class="text-end">Points</th>
+        </tr>
+    `);
 }
-addTableColumns()
+addTableColumns();
 
 numberFormatter = new numberformat.Formatter({
     format: 'hybrid',
