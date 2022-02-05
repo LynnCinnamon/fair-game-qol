@@ -86,15 +86,15 @@ $('body').css("line-height", 1);
 clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 
 function addTableColumns() {
-	$("#ladderBody").parent().find("thead").html(`<tr class="thead-light">
-													<th>#</th>
-													<th>Stats</th>
-													<th>Username</th>
-													<th class="text-end">Power</th>
-													<th>ETA to #1</th>
-													<th>ETA to You</th>
-													<th class="text-end">Points</th>
-												</tr>`)
+    $("#ladderBody").parent().find("thead").html(`<tr class="thead-light">
+                                                    <th>#</th>
+                                                    <th>Stats</th>
+                                                    <th>Username</th>
+                                                    <th class="text-end">Power</th>
+                                                    <th>ETA to #1</th>
+                                                    <th>ETA to You</th>
+                                                    <th class="text-end">Points</th>
+                                                </tr>`)
 }
 addTableColumns()
 
@@ -199,8 +199,8 @@ function writeNewRow(body, ranker) {
     row.cells[2].style.overflow = "hidden";
     row.insertCell(3).innerHTML = `${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[3].classList.add('text-end');
-	row.insertCell(4).innerHTML = timeToFirst;
-	row.insertCell(5).innerHTML = timeLeft;
+    row.insertCell(4).innerHTML = timeToFirst;
+    row.insertCell(5).innerHTML = timeLeft;
     row.insertCell(6).innerHTML = `${numberFormatter.format(ranker.points)}`;
     row.cells[6].classList.add('text-end');
 
