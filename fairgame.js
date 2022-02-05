@@ -199,7 +199,7 @@ function writeNewRow(body, ranker) {
     row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}]`;
     row.insertCell(2).innerHTML = `${ranker.username}`;
     row.cells[2].style.overflow = "hidden";
-    row.insertCell(3).innerHTML = `${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
+    row.insertCell(3).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[3].classList.add('text-end');
     row.insertCell(4).innerHTML = timeToFirst;
     row.insertCell(5).innerHTML = timeLeft;
