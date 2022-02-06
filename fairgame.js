@@ -30,6 +30,10 @@ window.qolOptions = {
     enabled: false,
     size: 30
   },
+  scrollableLadder: {
+    enabled: false,
+    size: 250 // <-- Change this value to change the default size of the ladder
+  },
   keybinds: false,
   printFillerRows: false,
   scrollableTable: false,
@@ -390,8 +394,28 @@ function setLadderRows() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
+
+function expandLadder() {
+    if(document.getElementsByClassName("ladder-container").length > 0) {
+        return;
+    }
+    qolOptions.expandedLadder.size = qolOptions.scrollableLadder.size;
+    clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
+    var ladder = document.querySelector(".caption-top");
+    var ladderParent = ladder.parentElement;
+    var ladderContainer = document.createElement("div");
+    ladderContainer.className = "ladder-container";
+    ladderContainer.style.width = "100%";
+    ladderContainer.style.height = "64vh";
+    ladderContainer.style.overflow = "auto";
+    ladderContainer.style.border = "gray solid 2px";
+    ladderParent.replaceChild(ladderContainer, ladder);
+    ladderContainer.appendChild(ladder);
+}
+
 addJS_Node(secondsToHms);
 addJS_Node(solveQuadratic);
+addJS_Node(expandLadder);
 addJS_Node(setLadderRows);
 addJS_Node(getAcc);
 // Overwrite original functions
@@ -413,6 +437,7 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
                        <option value="Lato">Lato</option>
                        </select></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="2" placeholder="# of rows, min 10" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
+                       `<button class="btn btn-primary shadow-none" id="scrollableLadder" onclick="expandLadder()">Full, scrollable Ladder</button>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
@@ -428,6 +453,7 @@ $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: bl
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
 if (qolOptions.printFillerRows) { $("#printFillerRows").attr("checked", "checked"); }
+if (qolOptions.scrollableLadder.enabled) { expandLadder() }
 if (qolOptions.scrollableTable) {
   $("#scrollableTable").attr("checked", "checked");
   document.body.style.removeProperty('overflow-y');
