@@ -210,9 +210,9 @@ function writeNewRow(body, ranker) {
         row.classList.add('table-active');
     } else if (!ranker.growing) {
         row.style['background-color'] = "#C0C0C0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never')) {
         row.style['background-color'] = "#A0EEA0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never')) {
         row.style['background-color'] = "#EEA0A0";
     }
 }
