@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.382
+// @version      0.390
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
