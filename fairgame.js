@@ -7,6 +7,8 @@
 // @match        https://fair.kaliburg.de/
 // @include      *kaliburg.de*
 // @icon         https://www.google.com/s2/favicons?domain=kaliburg.de
+// @downloadURL  https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
+// @updateURL    https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
 // @grant        none
 // @license      MIT
 // ==/UserScript==
