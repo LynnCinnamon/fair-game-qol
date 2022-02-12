@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.382
+// @version      0.390
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -26,21 +26,22 @@
 //////////////////////
 
 window.qolOptions = {
-  expandedLadder: {
-    enabled: false,
-    size: 30
-  },
-  keybinds: false,
-  printFillerRows: false,
-  scrollableTable: false,
-  promotePoints: true,
-  multiLeader: {
-    "default": "Both", // <--- Change this value to save between refreshs
-    "Disabled": false,
-    "Both": "[NUMBER xSTATUS]",
-    "Square": "[xSTATUS]",
-    "Number": "[NUMBER]",
-  },
+    expandedLadder: {
+        enabled: false,
+        size: 30
+    },
+    scrollableLadder: false,
+    keybinds: false,
+    printFillerRows: false,
+    scrollablePage: false,
+    promotePoints: true,
+    multiLeader: {
+        "default": "Both", // <--- Change this value to save between refreshs
+        "Disabled": false,
+        "Both": "[NUMBER xSTATUS]",
+        "Square": "[xSTATUS]",
+        "Number": "[NUMBER]",
+    },
 }
 
 //////////////////////////////////////
@@ -147,8 +148,8 @@ function solveQuadratic(a, b, c) {
 }
 
 function getAcc(ranker) {
-  if (ranker.rank === 1 || !ranker.growing) return 0;
-  return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
+    if (ranker.rank === 1 || !ranker.growing) return 0;
+    return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
 }
 
 function writeNewRow(body, ranker) {
@@ -180,20 +181,20 @@ function writeNewRow(body, ranker) {
     if (!ranker.growing || ranker.rank === 1) timeToFirst = "";
 
     if (ladderData.yourRanker.rank == ranker.rank) {
-      timeLeft = "";
+        timeLeft = "";
     }
 
     let assholeTag = (ranker.timesAsshole < infoData.assholeTags.length) ?
         infoData.assholeTags[ranker.timesAsshole] : infoData.assholeTags[infoData.assholeTags.length - 1];
     let rank = (ranker.rank === 1 && !ranker.you && ranker.growing && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) &&
-            ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
+                ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
         '<a href="#" style="text-decoration: none" onclick="throwVinegar()">🍇</a>' : ranker.rank;
-    
+
     let multiPrice = ""
     if ((ranker.rank === 1 && ranker.growing) && qolOptions.multiLeader[$("#leadermultimode")[0].value]) {
         multiPrice = qolOptions.multiLeader[$("#leadermultimode")[0].value]
-        .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
-        .replace("STATUS", `${(ranker.power >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
+            .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
+            .replace("STATUS", `${(ranker.power >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
     }
     row.insertCell(0).innerHTML = rank + " " + assholeTag;
     row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}]`;
@@ -235,10 +236,10 @@ function updateLadder() {
 
     // if we dont have enough Ranker yet, fill the table with filler rows
     if (qolOptions.printFillerRows) {
-      for (let i = body.rows.length; i < clientData.ladderAreaSize + clientData.ladderPadding * 2; i++) {
-        writeNewRow(body, rankerTemplate);
-        body.rows[i].style.visibility = 'hidden';
-      }
+        for (let i = body.rows.length; i < clientData.ladderAreaSize + clientData.ladderPadding * 2; i++) {
+            writeNewRow(body, rankerTemplate);
+            body.rows[i].style.visibility = 'hidden';
+        }
     }
 
     let tag1 = '<span>', tag2 = '</span>';
@@ -326,11 +327,11 @@ function showButtons() {
     // For multi payback you will need to solve accel_diff / 2 * t^2 - power * t - points = 0
     let nextMultiPayback = 0;
     if (nextMultiTime > 0) {
-      // If you don't have the required power calculate cost with future values
-      const targetPoints = ladderData.yourRanker.points.add(ladderData.yourRanker.power.times(nextMultiTime)).add(myAcc * myAcc * nextMultiTime / 2);
-      nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias)/2, -multiCost, -targetPoints);
+        // If you don't have the required power calculate cost with future values
+        const targetPoints = ladderData.yourRanker.points.add(ladderData.yourRanker.power.times(nextMultiTime)).add(myAcc * myAcc * nextMultiTime / 2);
+        nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias)/2, -multiCost, -targetPoints);
     } else {
-      nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias)/2, -ladderData.yourRanker.power, -ladderData.yourRanker.points);
+        nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias)/2, -ladderData.yourRanker.power, -ladderData.yourRanker.points);
     }
     nextMultiTime = secondsToHms(nextMultiTime);
     nextMultiPayback = secondsToHms(nextMultiPayback);
@@ -339,10 +340,10 @@ function showButtons() {
     // For bias payback you will need to solve accel_diff / 2 * t^2 - points = 0
     let nextBiasPayback = 0;
     if (nextBiasTime > 0) {
-      // If you don't have the required points calculate cost with future value
-      nextBiasPayback = solveQuadratic(ladderData.yourRanker.multiplier/2, 0, -biasCost);
+        // If you don't have the required points calculate cost with future value
+        nextBiasPayback = solveQuadratic(ladderData.yourRanker.multiplier/2, 0, -biasCost);
     } else {
-      nextBiasPayback = solveQuadratic(ladderData.yourRanker.multiplier/2, 0, -ladderData.yourRanker.points);
+        nextBiasPayback = solveQuadratic(ladderData.yourRanker.multiplier/2, 0, -ladderData.yourRanker.points);
     }
     nextBiasTime = secondsToHms(nextBiasTime);
     nextBiasPayback = secondsToHms(nextBiasPayback);
@@ -403,8 +404,30 @@ function setLadderRows() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
+function expandLadder(enabled) {
+    if (!enabled) {
+        var ladder = document.querySelector(".ladder-container");
+        ladder.outerHTML = ladder.innerHTML;
+        return;
+    }
+    if (document.getElementsByClassName("ladder-container").length > 0) {
+        return;
+    }
+    var ladder = document.querySelector(".caption-top");
+    var ladderParent = ladder.parentElement;
+    var ladderContainer = document.createElement("div");
+    ladderContainer.className = "ladder-container";
+    ladderContainer.style.width = "100%";
+    ladderContainer.style.height = "64vh";
+    ladderContainer.style.overflow = "auto";
+    ladderContainer.style.border = "gray solid 2px";
+    ladderParent.replaceChild(ladderContainer, ladder);
+    ladderContainer.appendChild(ladder);
+}
+
 addJS_Node(secondsToHms);
 addJS_Node(solveQuadratic);
+addJS_Node(expandLadder);
 addJS_Node(setLadderRows);
 addJS_Node(getAcc);
 // Overwrite original functions
@@ -420,33 +443,38 @@ $("#offcanvasNavbar").clone().attr("id", "offcanvasOptions").width("400px").inse
 $("#offcanvasOptions").children(".offcanvas-header").children("#offcanvasNavbarLabel").html("Options");
 $("#offcanvasOptions").children(".offcanvas-body").children().remove();
 $("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Font</span><select name="fonts" id="ladderFonts" class="form-select">
-                       <option value="">Default</option>
-                       <option value="BenchNine">BenchNine</option>
-                       <option value="Roboto">Roboto</option>
-                       <option value="Lato">Lato</option>
-                       </select></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="2" placeholder="# of rows, min 10" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableTable"><span style="padding: 10px">Make ladder scrollable</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
-                       `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Multi Requirement</span><select name="selector1" id="leadermultimode" class="form-select">
-                       <option value="Both">[524288 x🟩]</option>
-                       <option value="Square">[x🟩 / x🟥]</option>
-                       <option value="Number">[524288]</option>
-                       <option value="Disabled">Disabled</option>
-                       </select></div>`);
+                        <option value="">Default</option>
+                        <option value="BenchNine">BenchNine</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Lato">Lato</option>
+                        </select></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="4" placeholder="# of rows, min 10, default 30" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableLadder"><span style="padding: 10px">Full scrollable ladder</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollablePage"><span style="padding: 10px">Make page scrollable</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
+                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Multi Requirement</span><select name="selector1" id="leadermultimode" class="form-select">
+                        <option value="Both">[524288 x🟩]</option>
+                        <option value="Square">[x🟩 / x🟥]</option>
+                        <option value="Number">[524288]</option>
+                        <option value="Disabled">Disabled</option>
+                        </select></div>`);
 
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
 if (qolOptions.printFillerRows) { $("#printFillerRows").attr("checked", "checked"); }
-if (qolOptions.scrollableTable) {
-  $("#scrollableTable").attr("checked", "checked");
-  document.body.style.removeProperty('overflow-y');
+if (qolOptions.scrollablePage) {
+    $("#scrollablePage").attr("checked", "checked");
+    document.body.style.removeProperty('overflow-y');
 }
 if (qolOptions.promotePoints) {
-  $("#promotePoints").attr("checked", "checked");
+    $("#promotePoints").attr("checked", "checked");
+}
+if (qolOptions.scrollableLadder) {
+    $("#scrollableLadder").attr("checked", "checked");
+    expandLadder(true)
 }
 $("#leadermultimode")[0].value = qolOptions.multiLeader["default"]
 
@@ -462,26 +490,32 @@ $("#expandLadderSize")[0].addEventListener("change", (event)=>{
     }
 });
 
-$("#scrollableTable")[0].addEventListener("change", (event)=>{
-    if ($("#scrollableTable")[0].checked) {
-        qolOptions.scrollableTable = true;
+$("#scrollablePage")[0].addEventListener("change", (event)=>{
+    if ($("#scrollablePage")[0].checked) {
+        qolOptions.scrollablePage = true;
         document.body.style.removeProperty('overflow-y');
     } else {
-        qolOptions.scrollableTable = false;
+        qolOptions.scrollablePage = false;
         document.body.style.setProperty('overflow-y', 'hidden');
     }
 });
 
+$("#scrollableLadder")[0].addEventListener("change", (event)=>{
+    let boxChecked = $("#scrollableLadder")[0].checked;
+    qolOptions.scrollableLadder = boxChecked;
+    expandLadder(qolOptions.scrollableLadder)
+})
+
 function updateOptions(id, option) {
-  let input = $("#"+id)[0];
-  if (input) {
-    input.addEventListener("change", (event)=>{
-      let boxChecked = $("#"+id)[0].checked;
-      qolOptions[option] = boxChecked;
-    });
-  } else {
-    console.log(`Id ${id} was not found when linking options`);
-  }
+    let input = $("#"+id)[0];
+    if (input) {
+        input.addEventListener("change", (event)=>{
+            let boxChecked = $("#"+id)[0].checked;
+            qolOptions[option] = boxChecked;
+        });
+    } else {
+        console.log(`Id ${id} was not found when linking options`);
+    }
 }
 
 updateOptions('keybinds','keybinds');
