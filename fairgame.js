@@ -93,8 +93,8 @@ function addTableColumns() {
             <th>Stats</th>
             <th>Username</th>
             <th class="text-end">Power</th>
-            <th>ETA to #1</th>
-            <th>ETA to You</th>
+            <th class="text-end">ETA to #1</th>
+            <th class="text-end">ETA to You</th>
             <th class="text-end">Points</th>
         </tr>
     `);
@@ -203,7 +203,9 @@ function writeNewRow(body, ranker) {
     row.insertCell(3).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[3].classList.add('text-end');
     row.insertCell(4).innerHTML = timeToFirst;
+    row.cells[4].classList.add('text-end');
     row.insertCell(5).innerHTML = timeLeft;
+    row.cells[5].classList.add('text-end');
     row.insertCell(6).innerHTML = `${numberFormatter.format(ranker.points)}`;
     row.cells[6].classList.add('text-end');
 
