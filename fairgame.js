@@ -86,6 +86,21 @@ clientData.ladderAreaSize = 1;
 $('body').css("line-height", 1);
 clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 
+function addTableColumns() {
+    $("#ladderBody").parent().find("thead").html(`
+        <tr class="thead-light">
+            <th>#</th>
+            <th>Stats</th>
+            <th>Username</th>
+            <th class="text-end">Power</th>
+            <th>ETA to #1</th>
+            <th>ETA to You</th>
+            <th class="text-end">Points</th>
+        </tr>
+    `);
+}
+addTableColumns();
+
 numberFormatter = new numberformat.Formatter({
     format: 'hybrid',
     sigfigs: 6,
@@ -148,13 +163,9 @@ function writeNewRow(body, ranker) {
     let timeLeft = solveQuadratic(a, b, c);
     timeLeft = secondsToHms(timeLeft);
 
-
     if (timeLeft == '') {
         timeLeft = "Never";
     }
-
-    timeLeft = timeLeft + " - ";
-
 
     const pointsToFirst = ladderData.firstRanker.points.sub(ranker.points);
     const firstPowerDifference = ranker.power - (ladderData.firstRanker.growing ? ladderData.firstRanker.power : 0);
@@ -166,12 +177,11 @@ function writeNewRow(body, ranker) {
         // time to reach first ranker
         timeToFirst =  secondsToHms(solveQuadratic(theirAcc/2, firstPowerDifference, -pointsToFirst));
     }
-    timeToFirst = " - " + timeToFirst;
+
     if (!ranker.growing || ranker.rank === 1) timeToFirst = "";
 
     if (ladderData.yourRanker.rank == ranker.rank) {
         timeLeft = "";
-        //timeToFirst = "";
     }
 
     let assholeTag = (ranker.timesAsshole < infoData.assholeTags.length) ?
@@ -186,21 +196,24 @@ function writeNewRow(body, ranker) {
             .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
             .replace("STATUS", `${(ranker.power >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
     }
-    row.insertCell(0).innerHTML = rank + assholeTag;
-    row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}] ${ranker.username}`+timeToFirst;
-    row.cells[1].style.overflow = "hidden";
-    row.insertCell(2).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
-    row.cells[2].classList.add('text-end');
-    row.insertCell(3).innerHTML = `${timeLeft}${numberFormatter.format(ranker.points)}`;
+    row.insertCell(0).innerHTML = rank + " " + assholeTag;
+    row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}]`;
+    row.insertCell(2).innerHTML = `${ranker.username}`;
+    row.cells[2].style.overflow = "hidden";
+    row.insertCell(3).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[3].classList.add('text-end');
+    row.insertCell(4).innerHTML = timeToFirst;
+    row.insertCell(5).innerHTML = timeLeft;
+    row.insertCell(6).innerHTML = `${numberFormatter.format(ranker.points)}`;
+    row.cells[6].classList.add('text-end');
 
     if (ranker.you) {
         row.classList.add('table-active');
     } else if (!ranker.growing) {
         row.style['background-color'] = "#C0C0C0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never')) {
         row.style['background-color'] = "#A0EEA0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never')) {
         row.style['background-color'] = "#EEA0A0";
     }
 }
