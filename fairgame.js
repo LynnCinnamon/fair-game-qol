@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.400
+// @version      0.410
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -169,16 +169,17 @@ function writeNewRow(body, ranker) {
 
     const pointsToFirst = ladderData.firstRanker.points.sub(ranker.points);
     const firstPowerDifference = ranker.power - (ladderData.firstRanker.growing ? ladderData.firstRanker.power : 0);
+    const pointsLeftPromote = infoData.pointsForPromote - ranker.points;
     let timeToFirst = "";
     if (ladderData.firstRanker.points.lessThan(infoData.pointsForPromote)) {
         // Time to reach minimum promotion points of the ladder
-        timeToFirst = 'L' + secondsToHms(solveQuadratic(theirAcc/2, ranker.power, -infoData.pointsForPromote));
+        timeToFirst = 'L' + secondsToHms(solveQuadratic(theirAcc/2, ranker.power, -pointsLeftPromote));
     } else {
         // time to reach first ranker
         timeToFirst =  secondsToHms(solveQuadratic(theirAcc/2, firstPowerDifference, -pointsToFirst));
     }
 
-    if (!ranker.growing || ranker.rank === 1) timeToFirst = "";
+    if (!ranker.growing || (ranker.rank === 1 && ladderData.firstRanker.points.greaterThan(infoData.pointsForPromote))) timeToFirst = "";
 
     if (ladderData.yourRanker.rank == ranker.rank) {
         timeLeft = "";
