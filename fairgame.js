@@ -480,13 +480,13 @@ function SelectOption(title, id, values)
       </select>`);;
 }
 
-function TextInputOption(title, id, placeholder, maxlength)
+function TextInputOption(title, id, placeholder, maxlength, onclick)
 {
     return baseOptionDiv
     (`<span>${title}</span>
       <div class="input-group">
          <input class="form-control shadow-none" id="${id}" maxlength="${maxlength}" placeholder="${placeholder}" type="text">
-         <button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button>
+         <button class="btn btn-primary shadow-none" id="rowsButton" onclick="${onclick}">Set</button>
       </div>`)
 }
 
@@ -517,7 +517,7 @@ addOption(SelectOption("Ladder Font", "ladderFonts", [
     {display: "Roboto", value: "Roboto"},
     {display: "Lato", value: "Lato"},
 ]))
-addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4"))
+addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4", "setLadderRows()"))
 addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder"))
 addOption(CheckboxOption("Expand ladder size", "expandLadderSize"))
 addOption(CheckboxOption("Keybinds", "keybinds"))
