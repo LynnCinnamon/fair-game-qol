@@ -438,6 +438,48 @@ addJS_Node(showButtons);
 addJS_Node(updateLadder);
 addJS_Node(writeNewRow);
 
+
+
+function addOption(optionElement)
+{
+    $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
+}
+
+function baseOptionDiv(content = "")
+{
+    var newDiv = document.createElement("div");
+    newDiv.style = "display: block; padding: 0.5rem; font-size:1.25rem"
+    newDiv.innerHTML = content;
+    return newDiv;
+}
+
+function SelectOption(title, id, values)
+{
+    //values is an array of objects with display and value properties
+    return baseOptionDiv
+    (`<span>${title}</span>
+      <select name="fonts" id="${id}" class="form-select">
+            ${values.map(function(value) {
+                return `<option value="${value.value}">${value.display}</option>`
+            }).join("")}
+      </select>`);;
+}
+
+function TextInputOption(title, id, placeholder, maxlength)
+{
+    return baseOptionDiv
+    (`<span>${title}</span>
+      <div class="input-group">
+         <input class="form-control shadow-none" id="${id}" maxlength="${maxlength}" placeholder="${placeholder}" type="text">
+         <button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button>
+      </div>`)
+}
+
+function CheckboxOption(title, optionID)
+{
+    return baseOptionDiv(`<input type="checkbox" id="${optionID}"><span style="padding: 10px">${title}</span>`);
+}
+
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
 $(".navbar-toggler")[0].style['width'] = "5%";
@@ -445,25 +487,28 @@ $(`<button aria-controls="offcanvasNavbar" class="navbar-toggler" data-bs-target
 $("#offcanvasNavbar").clone().attr("id", "offcanvasOptions").width("400px").insertAfter("#offcanvasNavbar");
 $("#offcanvasOptions").children(".offcanvas-header").children("#offcanvasNavbarLabel").html("Options");
 $("#offcanvasOptions").children(".offcanvas-body").children().remove();
-$("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Font</span><select name="fonts" id="ladderFonts" class="form-select">
-                        <option value="">Default</option>
-                        <option value="BenchNine">BenchNine</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Lato">Lato</option>
-                        </select></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="4" placeholder="# of rows, min 10, default 30" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableLadder"><span style="padding: 10px">Full scrollable ladder</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollablePage"><span style="padding: 10px">Make page scrollable</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Multi Requirement</span><select name="selector1" id="leadermultimode" class="form-select">
-                        <option value="Both">[524288 x🟩]</option>
-                        <option value="Square">[x🟩 / x🟥]</option>
-                        <option value="Number">[524288]</option>
-                        <option value="Disabled">Disabled</option>
-                        </select></div>`);
+
+addOption(SelectOption("Ladder Font", "ladderFonts", [
+    {display: "Default", value: ""},
+    {display: "BenchNine", value: "BenchNine"},
+    {display: "Roboto", value: "Roboto"},
+    {display: "Lato", value: "Lato"},
+]))
+addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4"))
+addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder"))
+addOption(CheckboxOption("Expand ladder size", "expandLadderSize"))
+addOption(CheckboxOption("Keybinds", "keybinds"))
+addOption(CheckboxOption("Append filler rankers", "printFillerRows"))
+addOption(CheckboxOption("Make page scrollable", "scrollablePage"))
+addOption(CheckboxOption("Show points for promotion", "promotePoints"))
+addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
+    {display: "[524288 x🟩]", value: "Both"},
+    {display: "[x🟩 / x🟥]", value: "Square"},
+    {display: "[524288]", value: "Number"},
+    {display: "Disabled", value: "Disabled"},
+]))
+
+
 
 if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
 if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
