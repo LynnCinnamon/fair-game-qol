@@ -445,6 +445,7 @@ function addOption(optionElement)
     $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
 }
 
+
 function addOptionDevider()
 {
     var optionElement = document.createElement("hr");
@@ -485,6 +486,14 @@ function CheckboxOption(title, optionID)
 {
     return baseOptionDiv(`<input type="checkbox" id="${optionID}"><span style="padding: 10px">${title}</span>`);
 }
+
+addJS_Node(addOption);
+addJS_Node(addOptionDevider);
+addJS_Node(baseOptionDiv);
+addJS_Node(SelectOption);
+addJS_Node(TextInputOption);
+addJS_Node(CheckboxOption);
+
 
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
