@@ -452,6 +452,14 @@ function addOptionDevider()
     addOption(optionElement);
 }
 
+function addNewSection(name)
+{
+    addOptionDevider();
+    var optionElement = document.createElement("h4");
+    optionElement.innerHTML = name;
+    addOption(optionElement);
+}
+
 function baseOptionDiv(content = "")
 {
     var newDiv = document.createElement("div");
@@ -482,9 +490,9 @@ function TextInputOption(title, id, placeholder, maxlength)
       </div>`)
 }
 
-function CheckboxOption(title, optionID)
+function CheckboxOption(title, optionID, defaultChecked=false)
 {
-    return baseOptionDiv(`<input type="checkbox" id="${optionID}"><span style="padding: 10px">${title}</span>`);
+    return baseOptionDiv(`<input type="checkbox" ${defaultChecked?"checked" : ""} id="${optionID}"><span style="padding: 10px">${title}</span>`);
 }
 
 addJS_Node(addOption);
