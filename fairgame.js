@@ -445,6 +445,12 @@ function addOption(optionElement)
     $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
 }
 
+function addOptionDevider()
+{
+    var optionElement = document.createElement("hr");
+    addOption(optionElement);
+}
+
 function baseOptionDiv(content = "")
 {
     var newDiv = document.createElement("div");
