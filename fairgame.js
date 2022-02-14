@@ -121,7 +121,7 @@ window.secondsToHms = function(d) {
 
 
 // returns positive minimal positive solution or "Inf"
-function solveQuadratic(a, b, c) {
+window.solveQuadratic = function(a, b, c) {
     if (a == 0) {
         return -c / b > 0 ? (-c / b).toFixed(2) : "Inf";
     } else {
@@ -139,7 +139,7 @@ function solveQuadratic(a, b, c) {
     }
 }
 
-function getAcc(ranker) {
+window.getAcc = function(ranker) {
     if (ranker.rank === 1 || !ranker.growing) return 0;
     return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
 }
