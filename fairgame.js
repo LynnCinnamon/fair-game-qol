@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.420
+// @version      0.421
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -373,7 +373,7 @@ window.showButtons = function() {
     }
 }
 
-function setLadderRows() {
+window.setLadderRows = function() {
     var input = Number($("#rowsInput")[0].value);
     if (isNaN(input)) {
         $("#rowsInput")[0].value = '';
