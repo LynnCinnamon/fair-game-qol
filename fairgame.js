@@ -26,6 +26,11 @@
 //      Options     //
 //////////////////////
 
+
+if (typeof unsafeWindow !== 'undefined') {
+    window = unsafeWindow;
+}
+
 window.qolOptions = {
     expandedLadder: {
         enabled: false,
@@ -44,16 +49,10 @@ window.qolOptions = {
     },
 }
 
-//Expose options to the user
-unsafeWindow.qolOptions = window.qolOptions;
 
 //////////////////////////////////////
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
-
-if (typeof unsafeWindow !== 'undefined') {
-    window = unsafeWindow;
-}
 
 
 document.addEventListener("keyup", event => {
