@@ -26,6 +26,11 @@
 //      Options     //
 //////////////////////
 
+
+if (typeof unsafeWindow !== 'undefined') {
+    window = unsafeWindow;
+}
+
 window.qolOptions = {
     expandedLadder: {
         enabled: false,
@@ -44,13 +49,11 @@ window.qolOptions = {
     },
 }
 
+
 //////////////////////////////////////
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
 
-if (typeof unsafeWindow !== 'undefined') {
-    window = unsafeWindow;
-}
 
 document.addEventListener("keyup", event => {
     if (!qolOptions.keybinds) return;
@@ -98,7 +101,7 @@ numberFormatter = new numberformat.Formatter({
     maxSmall: 0
 });
 
-function secondsToHms(d) {
+window.secondsToHms = function(d) {
     d = Number(d);
     if (d === 0) return "0s";
     var h = Math.floor(d / 3600);
@@ -118,7 +121,7 @@ function secondsToHms(d) {
 
 
 // returns positive minimal positive solution or "Inf"
-function solveQuadratic(a, b, c) {
+window.solveQuadratic = function(a, b, c) {
     if (a == 0) {
         return -c / b > 0 ? (-c / b).toFixed(2) : "Inf";
     } else {
@@ -136,7 +139,7 @@ function solveQuadratic(a, b, c) {
     }
 }
 
-function getAcc(ranker) {
+window.getAcc = function(ranker) {
     if (ranker.rank === 1 || !ranker.growing) return 0;
     return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
 }
@@ -409,30 +412,30 @@ function expandLadder(enabled) {
     ladderContainer.appendChild(ladder);
 }
 
-function addOption(optionElement) {
+window.addOption = function(optionElement) {
     $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
 }
 
-function addOptionDevider() {
+window.addOptionDevider = function() {
     var optionElement = document.createElement("hr");
     addOption(optionElement);
 }
 
-function addNewSection(name) {
+window.addNewSection = function(name) {
     addOptionDevider();
     var optionElement = document.createElement("h4");
     optionElement.innerHTML = name;
     addOption(optionElement);
 }
 
-function baseOptionDiv(content = "") {
+window.baseOptionDiv = function(content = "") {
     var newDiv = document.createElement("div");
     newDiv.style = "display: block; padding: 0.5rem; font-size:1.25rem"
     newDiv.innerHTML = content;
     return newDiv;
 }
 
-function SelectOption(title, id, values) {
+window.SelectOption = function(title, id, values) {
     //values is an array of objects with display and value properties
     return baseOptionDiv
     (`<span>${title}</span>
@@ -443,7 +446,7 @@ function SelectOption(title, id, values) {
       </select>`);
 }
 
-function TextInputOption(title, id, placeholder, maxlength, onclick) {
+window.TextInputOption = function(title, id, placeholder, maxlength, onclick) {
     return baseOptionDiv
     (`<span>${title}</span>
       <div class="input-group">
@@ -452,7 +455,7 @@ function TextInputOption(title, id, placeholder, maxlength, onclick) {
       </div>`);
 }
 
-function CheckboxOption(title, optionID, defaultChecked=false) {
+window.CheckboxOption = function(title, optionID, defaultChecked=false) {
     return baseOptionDiv(`<input type="checkbox" ${defaultChecked?"checked='checked'" : ""} id="${optionID}"><span style="padding: 10px">${title}</span>`);
 }
 
