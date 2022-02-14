@@ -6,8 +6,9 @@
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
 // @include      *kaliburg.de*
+// @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?domain=kaliburg.de
-// @grant        none
+// @grant        unsafeWindow
 // @license      MIT
 // ==/UserScript==
 
@@ -32,7 +33,6 @@ window.qolOptions = {
     },
     scrollableLadder: false,
     keybinds: false,
-    printFillerRows: false,
     scrollablePage: false,
     promotePoints: true,
     multiLeader: {
@@ -48,19 +48,8 @@ window.qolOptions = {
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
 
-function addJS_Node(text, s_URL, funcToRun, runOnLoad) {
-    var D = document;
-    var scriptNode = D.createElement('script');
-    if (runOnLoad) {
-        scriptNode.addEventListener("load", runOnLoad, false);
-    }
-    scriptNode.type = "text/javascript";
-    if (text) scriptNode.textContent = text;
-    if (s_URL) scriptNode.src = s_URL;
-    if (funcToRun) scriptNode.textContent = '(' + funcToRun.toString() + ')()';
-
-    var targ = D.getElementsByTagName('head')[0] || D.body || D.documentElement;
-    targ.appendChild(scriptNode);
+if (typeof unsafeWindow !== 'undefined') {
+    window = unsafeWindow;
 }
 
 document.addEventListener("keyup", event => {
@@ -152,7 +141,7 @@ function getAcc(ranker) {
     return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
 }
 
-function writeNewRow(body, ranker) {
+window.writeNewRow = function(body, ranker) {
     let row = body.insertRow();
     const myAcc = getAcc(ladderData.yourRanker);
     const theirAcc = getAcc(ranker);
@@ -221,7 +210,7 @@ function writeNewRow(body, ranker) {
     }
 }
 
-function updateLadder() {
+window.updateLadder = function() {
     let size = ladderData.rankers.length;
     let rank = ladderData.yourRanker.rank;
     let ladderArea = Math.floor(rank / clientData.ladderAreaSize);
@@ -235,14 +224,6 @@ function updateLadder() {
     for (let i = 0; i < ladderData.rankers.length; i++) {
         let ranker = ladderData.rankers[i];
         if ((ranker.rank >= startRank && ranker.rank <= endRank)) writeNewRow(body, ranker);
-    }
-
-    // if we dont have enough Ranker yet, fill the table with filler rows
-    if (qolOptions.printFillerRows) {
-        for (let i = body.rows.length; i < clientData.ladderAreaSize + clientData.ladderPadding * 2; i++) {
-            writeNewRow(body, rankerTemplate);
-            body.rows[i].style.visibility = 'hidden';
-        }
     }
 
     let tag1 = '<span>', tag2 = '</span>';
@@ -304,7 +285,7 @@ function updateLadder() {
     showButtons();
 }
 
-function showButtons() {
+window.showButtons = function() {
     let biasButton = $('#biasButton');
     let multiButton = $('#multiButton');
 
@@ -392,7 +373,6 @@ function showButtons() {
     }
 }
 
-
 function setLadderRows() {
     var input = Number($("#rowsInput")[0].value);
     if (isNaN(input)) {
@@ -408,15 +388,16 @@ function setLadderRows() {
 }
 
 function expandLadder(enabled) {
+    var ladder;
     if (!enabled) {
-        var ladder = document.querySelector(".ladder-container");
+        ladder = document.querySelector(".ladder-container");
         ladder.outerHTML = ladder.innerHTML;
         return;
     }
     if (document.getElementsByClassName("ladder-container").length > 0) {
         return;
     }
-    var ladder = document.querySelector(".caption-top");
+    ladder = document.querySelector(".caption-top");
     var ladderParent = ladder.parentElement;
     var ladderContainer = document.createElement("div");
     ladderContainer.className = "ladder-container";
@@ -428,48 +409,30 @@ function expandLadder(enabled) {
     ladderContainer.appendChild(ladder);
 }
 
-addJS_Node(secondsToHms);
-addJS_Node(solveQuadratic);
-addJS_Node(expandLadder);
-addJS_Node(setLadderRows);
-addJS_Node(getAcc);
-// Overwrite original functions
-addJS_Node(showButtons);
-addJS_Node(updateLadder);
-addJS_Node(writeNewRow);
-
-
-
-function addOption(optionElement)
-{
+function addOption(optionElement) {
     $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
 }
 
-
-function addOptionDevider()
-{
+function addOptionDevider() {
     var optionElement = document.createElement("hr");
     addOption(optionElement);
 }
 
-function addNewSection(name)
-{
+function addNewSection(name) {
     addOptionDevider();
     var optionElement = document.createElement("h4");
     optionElement.innerHTML = name;
     addOption(optionElement);
 }
 
-function baseOptionDiv(content = "")
-{
+function baseOptionDiv(content = "") {
     var newDiv = document.createElement("div");
     newDiv.style = "display: block; padding: 0.5rem; font-size:1.25rem"
     newDiv.innerHTML = content;
     return newDiv;
 }
 
-function SelectOption(title, id, values)
-{
+function SelectOption(title, id, values) {
     //values is an array of objects with display and value properties
     return baseOptionDiv
     (`<span>${title}</span>
@@ -477,31 +440,21 @@ function SelectOption(title, id, values)
             ${values.map(function(value) {
                 return `<option value="${value.value}">${value.display}</option>`
             }).join("")}
-      </select>`);;
+      </select>`);
 }
 
-function TextInputOption(title, id, placeholder, maxlength, onclick)
-{
+function TextInputOption(title, id, placeholder, maxlength, onclick) {
     return baseOptionDiv
     (`<span>${title}</span>
       <div class="input-group">
          <input class="form-control shadow-none" id="${id}" maxlength="${maxlength}" placeholder="${placeholder}" type="text">
          <button class="btn btn-primary shadow-none" id="rowsButton" onclick="${onclick}">Set</button>
-      </div>`)
+      </div>`);
 }
 
-function CheckboxOption(title, optionID, defaultChecked=false)
-{
-    return baseOptionDiv(`<input type="checkbox" ${defaultChecked?"checked" : ""} id="${optionID}"><span style="padding: 10px">${title}</span>`);
+function CheckboxOption(title, optionID, defaultChecked=false) {
+    return baseOptionDiv(`<input type="checkbox" ${defaultChecked?"checked='checked'" : ""} id="${optionID}"><span style="padding: 10px">${title}</span>`);
 }
-
-addJS_Node(addOption);
-addJS_Node(addOptionDevider);
-addJS_Node(baseOptionDiv);
-addJS_Node(SelectOption);
-addJS_Node(TextInputOption);
-addJS_Node(CheckboxOption);
-
 
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
@@ -518,12 +471,11 @@ addOption(SelectOption("Ladder Font", "ladderFonts", [
     {display: "Lato", value: "Lato"},
 ]))
 addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4", "setLadderRows()"))
-addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder"))
-addOption(CheckboxOption("Expand ladder size", "expandLadderSize"))
-addOption(CheckboxOption("Keybinds", "keybinds"))
-addOption(CheckboxOption("Append filler rankers", "printFillerRows"))
-addOption(CheckboxOption("Make page scrollable", "scrollablePage"))
-addOption(CheckboxOption("Show points for promotion", "promotePoints"))
+addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder", qolOptions.scrollableLadder))
+addOption(CheckboxOption("Expand ladder size", "expandedLadder", qolOptions.expandedLadder.enabled))
+addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
+addOption(CheckboxOption("Make page scrollable", "scrollablePage", qolOptions.scrollablePage))
+addOption(CheckboxOption("Show points for promotion", "promotePoints", qolOptions.promotePoints))
 addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
     {display: "[524288 x🟩]", value: "Both"},
     {display: "[x🟩 / x🟥]", value: "Square"},
@@ -531,42 +483,29 @@ addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
     {display: "Disabled", value: "Disabled"},
 ]))
 
+if (qolOptions.scrollablePage) document.body.style.removeProperty('overflow-y');
+if (qolOptions.scrollableLadder) expandLadder(true)
 
-
-if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
-if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
-if (qolOptions.printFillerRows) { $("#printFillerRows").attr("checked", "checked"); }
-if (qolOptions.scrollablePage) {
-    $("#scrollablePage").attr("checked", "checked");
-    document.body.style.removeProperty('overflow-y');
-}
-if (qolOptions.promotePoints) {
-    $("#promotePoints").attr("checked", "checked");
-}
-if (qolOptions.scrollableLadder) {
-    $("#scrollableLadder").attr("checked", "checked");
-    expandLadder(true)
-}
 $("#leadermultimode")[0].value = qolOptions.multiLeader["default"]
 
-$("#expandLadderSize")[0].addEventListener("change", (event)=>{
-    if ($("#expandLadderSize")[0].checked) {
-        qolOptions.expandedLadder.enabled = true;
+$("#expandedLadder")[0].addEventListener("change", (event)=>{
+    let boxChecked = $("#expandedLadder")[0].checked;
+    qolOptions.expandedLadder.enabled = boxChecked;
+    if (boxChecked) {
         $('#infoText').parent().parent().removeClass('col-7').addClass('col-12');
         $('#infoText').parent().parent().next().hide();
     } else {
-        qolOptions.expandedLadder.enabled = false;
         $('#infoText').parent().parent().addClass('col-7').removeClass('col-12');
         $('#infoText').parent().parent().next().show();
     }
 });
 
 $("#scrollablePage")[0].addEventListener("change", (event)=>{
-    if ($("#scrollablePage")[0].checked) {
-        qolOptions.scrollablePage = true;
+    let boxChecked = $("#scrollablePage")[0].checked;
+    qolOptions.scrollablePage = boxChecked;
+    if (boxChecked) {
         document.body.style.removeProperty('overflow-y');
     } else {
-        qolOptions.scrollablePage = false;
         document.body.style.setProperty('overflow-y', 'hidden');
     }
 });
@@ -590,7 +529,6 @@ function updateOptions(id, option) {
 }
 
 updateOptions('keybinds','keybinds');
-updateOptions('printFillerRows','printFillerRows');
 updateOptions('promotePoints','promotePoints');
 
 var linkTag = document.createElement('link');
