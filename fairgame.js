@@ -358,7 +358,7 @@ function showButtons() {
     let assholeButton = $('#assholeButton');
     let ladderNumber = $('#ladderNumber');
 
-    if (ladderData.firstRanker.you && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) && ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0) {
+    if (ladderData.firstRanker.you && ladderData.firstRanker.points.cmp(ladderStats.pointsNeededForManualPromote) >= 0) {
         if (ladderData.currentLadder.number === infoData.assholeLadder) {
             promoteButton.hide()
             ladderNumber.hide()
