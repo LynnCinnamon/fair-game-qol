@@ -60,11 +60,11 @@ document.addEventListener("keyup", event => {
     if (!event.target.isEqualNode($("body")[0])) return;
     if (event.key === "b") {
         event.preventDefault()
-        buyBias();
+        //buyBias(event);
     }
     if (event.key === "m") {
         event.preventDefault();
-        buyMulti();
+        //buyMulti(event);
     }
 });
 
