@@ -1,5 +1,5 @@
 # fair-game-qol
-A tampermonkey script for fair game, which is hosted on fair.kaliburg.de
+A tampermonkey script for fair game, which is hosted on https://fair.kaliburg.de
 
 ## Installation
 This method auto-updates your script and is automatically run when you load the site.
