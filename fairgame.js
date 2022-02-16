@@ -8,8 +8,8 @@
 // @include      *kaliburg.de*
 // @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?domain=kaliburg.de
-// @downloadURL  https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
-// @updateURL    https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
+// @downloadURL  https://raw.githubusercontent.com/LynnCinnamon/fair-game-qol/main/fairgame.js
+// @updateURL    https://raw.githubusercontent.com/LynnCinnamon/fair-game-qol/main/fairgame.js
 // @grant        unsafeWindow
 // @license      MIT
 // ==/UserScript==
