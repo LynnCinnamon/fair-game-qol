@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.424
+// @version      0.425
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
@@ -162,9 +162,9 @@ window.writeNewRow = function(body, ranker) {
 
     const pointsToFirst = ladderData.firstRanker.points.sub(ranker.points);
     const firstPowerDifference = ranker.power - (ladderData.firstRanker.growing ? ladderData.firstRanker.power : 0);
-    const pointsLeftPromote = infoData.pointsForPromote - ranker.points;
+    const pointsLeftPromote = infoData.pointsForPromote.mul(ladderData.currentLadder.number) - ranker.points;
     let timeToFirst = "";
-    if (ladderData.firstRanker.points.lessThan(infoData.pointsForPromote)) {
+    if (ladderData.firstRanker.points.lessThan(infoData.pointsForPromote.mul(ladderData.currentLadder.number))) {
         // Time to reach minimum promotion points of the ladder
         timeToFirst = 'L' + secondsToHms(solveQuadratic(theirAcc/2, ranker.power, -pointsLeftPromote));
     } else {
@@ -172,7 +172,7 @@ window.writeNewRow = function(body, ranker) {
         timeToFirst =  secondsToHms(solveQuadratic(theirAcc/2, firstPowerDifference, -pointsToFirst));
     }
 
-    if (!ranker.growing || (ranker.rank === 1 && ladderData.firstRanker.points.greaterThan(infoData.pointsForPromote))) timeToFirst = "";
+    if (!ranker.growing || (ranker.rank === 1 && ladderData.firstRanker.points.greaterThan(infoData.pointsForPromote.mul(ladderData.currentLadder.number)))) timeToFirst = "";
 
     if (ladderData.yourRanker.rank == ranker.rank) {
         timeLeft = "";
@@ -181,7 +181,7 @@ window.writeNewRow = function(body, ranker) {
     let assholeTag = (ranker.timesAsshole < infoData.assholeTags.length) ?
         infoData.assholeTags[ranker.timesAsshole] : infoData.assholeTags[infoData.assholeTags.length - 1];
     let rank = (ranker.rank === 1 && !ranker.you && ranker.growing && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) &&
-                ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
+                ladderData.firstRanker.points.cmp(infoData.pointsForPromote.mul(ladderData.currentLadder.number)) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
         '<a href="#" style="text-decoration: none" onclick="throwVinegar(event)">🍇</a>' : ranker.rank;
 
     let multiPrice = ""
