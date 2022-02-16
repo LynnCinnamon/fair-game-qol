@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name         Fair Game QoL v1
 // @namespace    https://fair.kaliburg.de/#
-// @version      0.390
+// @version      0.423
 // @description  Fair Game QOL Enhancements
 // @author       Aqualxx
 // @match        https://fair.kaliburg.de/
 // @include      *kaliburg.de*
+// @run-at       document-end
 // @icon         https://www.google.com/s2/favicons?domain=kaliburg.de
 // @downloadURL  https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
 // @updateURL    https://raw.githubusercontent.com/aqualxx/fair-game-qol/main/fairgame.js
-// @grant        none
+// @grant        unsafeWindow
 // @license      MIT
 // ==/UserScript==
 
@@ -27,6 +28,11 @@
 //      Options     //
 //////////////////////
 
+
+if (typeof unsafeWindow !== 'undefined') {
+    window = unsafeWindow;
+}
+
 window.qolOptions = {
     expandedLadder: {
         enabled: false,
@@ -34,7 +40,6 @@ window.qolOptions = {
     },
     scrollableLadder: false,
     keybinds: false,
-    printFillerRows: false,
     scrollablePage: false,
     promotePoints: true,
     multiLeader: {
@@ -46,35 +51,21 @@ window.qolOptions = {
     },
 }
 
+
 //////////////////////////////////////
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
-
-function addJS_Node(text, s_URL, funcToRun, runOnLoad) {
-    var D = document;
-    var scriptNode = D.createElement('script');
-    if (runOnLoad) {
-        scriptNode.addEventListener("load", runOnLoad, false);
-    }
-    scriptNode.type = "text/javascript";
-    if (text) scriptNode.textContent = text;
-    if (s_URL) scriptNode.src = s_URL;
-    if (funcToRun) scriptNode.textContent = '(' + funcToRun.toString() + ')()';
-
-    var targ = D.getElementsByTagName('head')[0] || D.body || D.documentElement;
-    targ.appendChild(scriptNode);
-}
 
 document.addEventListener("keyup", event => {
     if (!qolOptions.keybinds) return;
     if (!event.target.isEqualNode($("body")[0])) return;
     if (event.key === "b") {
         event.preventDefault()
-        buyBias();
+        //buyBias(event);
     }
     if (event.key === "m") {
         event.preventDefault();
-        buyMulti();
+        //buyMulti(event);
     }
 });
 
@@ -88,6 +79,21 @@ clientData.ladderAreaSize = 1;
 $('body').css("line-height", 1);
 clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 
+function addTableColumns() {
+    $("#ladderBody").parent().find("thead").html(`
+        <tr class="thead-light">
+            <th>#</th>
+            <th>Stats</th>
+            <th>Username</th>
+            <th class="text-end">Power</th>
+            <th class="text-end">ETA to #1</th>
+            <th class="text-end">ETA to You</th>
+            <th class="text-end">Points</th>
+        </tr>
+    `);
+}
+addTableColumns();
+
 numberFormatter = new numberformat.Formatter({
     format: 'hybrid',
     sigfigs: 6,
@@ -96,7 +102,7 @@ numberFormatter = new numberformat.Formatter({
     maxSmall: 0
 });
 
-function secondsToHms(d) {
+window.secondsToHms = function(d) {
     d = Number(d);
     if (d === 0) return "0s";
     var h = Math.floor(d / 3600);
@@ -116,7 +122,7 @@ function secondsToHms(d) {
 
 
 // returns positive minimal positive solution or "Inf"
-function solveQuadratic(a, b, c) {
+window.solveQuadratic = function(a, b, c) {
     if (a == 0) {
         return -c / b > 0 ? (-c / b).toFixed(2) : "Inf";
     } else {
@@ -134,12 +140,12 @@ function solveQuadratic(a, b, c) {
     }
 }
 
-function getAcc(ranker) {
+window.getAcc = function(ranker) {
     if (ranker.rank === 1 || !ranker.growing) return 0;
     return (ranker.bias + ranker.rank  - 1) * ranker.multiplier;
 }
 
-function writeNewRow(body, ranker) {
+window.writeNewRow = function(body, ranker) {
     let row = body.insertRow();
     const myAcc = getAcc(ladderData.yourRanker);
     const theirAcc = getAcc(ranker);
@@ -150,37 +156,33 @@ function writeNewRow(body, ranker) {
     let timeLeft = solveQuadratic(a, b, c);
     timeLeft = secondsToHms(timeLeft);
 
-
     if (timeLeft == '') {
         timeLeft = "Never";
     }
 
-    timeLeft = timeLeft + " - ";
-
-
     const pointsToFirst = ladderData.firstRanker.points.sub(ranker.points);
     const firstPowerDifference = ranker.power - (ladderData.firstRanker.growing ? ladderData.firstRanker.power : 0);
+    const pointsLeftPromote = infoData.pointsForPromote - ranker.points;
     let timeToFirst = "";
     if (ladderData.firstRanker.points.lessThan(infoData.pointsForPromote)) {
         // Time to reach minimum promotion points of the ladder
-        timeToFirst = 'L' + secondsToHms(solveQuadratic(theirAcc/2, ranker.power, -infoData.pointsForPromote));
+        timeToFirst = 'L' + secondsToHms(solveQuadratic(theirAcc/2, ranker.power, -pointsLeftPromote));
     } else {
         // time to reach first ranker
         timeToFirst =  secondsToHms(solveQuadratic(theirAcc/2, firstPowerDifference, -pointsToFirst));
     }
-    timeToFirst = " - " + timeToFirst;
-    if (!ranker.growing || ranker.rank === 1) timeToFirst = "";
+
+    if (!ranker.growing || (ranker.rank === 1 && ladderData.firstRanker.points.greaterThan(infoData.pointsForPromote))) timeToFirst = "";
 
     if (ladderData.yourRanker.rank == ranker.rank) {
         timeLeft = "";
-        //timeToFirst = "";
     }
 
     let assholeTag = (ranker.timesAsshole < infoData.assholeTags.length) ?
         infoData.assholeTags[ranker.timesAsshole] : infoData.assholeTags[infoData.assholeTags.length - 1];
     let rank = (ranker.rank === 1 && !ranker.you && ranker.growing && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) &&
                 ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0 && ladderData.yourRanker.vinegar.cmp(getVinegarThrowCost()) >= 0) ?
-        '<a href="#" style="text-decoration: none" onclick="throwVinegar()">🍇</a>' : ranker.rank;
+        '<a href="#" style="text-decoration: none" onclick="throwVinegar(event)">🍇</a>' : ranker.rank;
 
     let multiPrice = ""
     if ((ranker.rank === 1 && ranker.growing) && qolOptions.multiLeader[$("#leadermultimode")[0].value]) {
@@ -188,26 +190,31 @@ function writeNewRow(body, ranker) {
             .replace("NUMBER",`${numberFormatter.format(Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1))}`)
             .replace("STATUS", `${(ranker.power >= Math.pow(ladderData.currentLadder.number+1, ranker.multiplier+1)) ? "🟩" : "🟥"}`)
     }
-    row.insertCell(0).innerHTML = rank + assholeTag;
-    row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}] ${ranker.username}`+timeToFirst;
-    row.cells[1].style.overflow = "hidden";
-    row.insertCell(2).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
-    row.cells[2].classList.add('text-end');
-    row.insertCell(3).innerHTML = `${timeLeft}${numberFormatter.format(ranker.points)}`;
+    row.insertCell(0).innerHTML = rank + " " + assholeTag;
+    row.insertCell(1).innerHTML = `[+${ranker.bias.toString().padStart(2,"0")} x${ranker.multiplier.toString().padStart(2,"0")}]`;
+    row.insertCell(2).innerHTML = `${ranker.username}`;
+    row.cells[2].style.overflow = "hidden";
+    row.insertCell(3).innerHTML = `${multiPrice} ${numberFormatter.format(ranker.power)} ${ranker.growing ? ranker.rank != 1 ? "(+" + numberFormatter.format((ranker.rank - 1 + ranker.bias) * ranker.multiplier) + ")" : "" : "(Promoted)"}`;
     row.cells[3].classList.add('text-end');
+    row.insertCell(4).innerHTML = timeToFirst;
+    row.cells[4].classList.add('text-end');
+    row.insertCell(5).innerHTML = timeLeft;
+    row.cells[5].classList.add('text-end');
+    row.insertCell(6).innerHTML = `${numberFormatter.format(ranker.points)}`;
+    row.cells[6].classList.add('text-end');
 
     if (ranker.you) {
         row.classList.add('table-active');
     } else if (!ranker.growing) {
         row.style['background-color'] = "#C0C0C0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft != 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft == 'Never')) {
         row.style['background-color'] = "#A0EEA0";
-    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never - ') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never - ')) {
+    } else if ((ranker.rank < ladderData.yourRanker.rank && timeLeft == 'Never') || (ranker.rank > ladderData.yourRanker.rank && timeLeft != 'Never')) {
         row.style['background-color'] = "#EEA0A0";
     }
 }
 
-function updateLadder() {
+window.updateLadder = function() {
     let size = ladderData.rankers.length;
     let rank = ladderData.yourRanker.rank;
     let ladderArea = Math.floor(rank / clientData.ladderAreaSize);
@@ -221,14 +228,6 @@ function updateLadder() {
     for (let i = 0; i < ladderData.rankers.length; i++) {
         let ranker = ladderData.rankers[i];
         if ((ranker.rank >= startRank && ranker.rank <= endRank)) writeNewRow(body, ranker);
-    }
-
-    // if we dont have enough Ranker yet, fill the table with filler rows
-    if (qolOptions.printFillerRows) {
-        for (let i = body.rows.length; i < clientData.ladderAreaSize + clientData.ladderPadding * 2; i++) {
-            writeNewRow(body, rankerTemplate);
-            body.rows[i].style.visibility = 'hidden';
-        }
     }
 
     let tag1 = '<span>', tag2 = '</span>';
@@ -290,7 +289,7 @@ function updateLadder() {
     showButtons();
 }
 
-function showButtons() {
+window.showButtons = function() {
     let biasButton = $('#biasButton');
     let multiButton = $('#multiButton');
 
@@ -344,7 +343,7 @@ function showButtons() {
     let assholeButton = $('#assholeButton');
     let ladderNumber = $('#ladderNumber');
 
-    if (ladderData.firstRanker.you && ladderData.rankers.length >= Math.max(infoData.minimumPeopleForPromote, ladderData.currentLadder.number) && ladderData.firstRanker.points.cmp(infoData.pointsForPromote) >= 0) {
+    if (ladderData.firstRanker.you && ladderData.firstRanker.points.cmp(ladderStats.pointsNeededForManualPromote) >= 0) {
         if (ladderData.currentLadder.number === infoData.assholeLadder) {
             promoteButton.hide()
             ladderNumber.hide()
@@ -378,8 +377,7 @@ function showButtons() {
     }
 }
 
-
-function setLadderRows() {
+window.setLadderRows = function() {
     var input = Number($("#rowsInput")[0].value);
     if (isNaN(input)) {
         $("#rowsInput")[0].value = '';
@@ -394,15 +392,16 @@ function setLadderRows() {
 }
 
 function expandLadder(enabled) {
+    var ladder;
     if (!enabled) {
-        var ladder = document.querySelector(".ladder-container");
+        ladder = document.querySelector(".ladder-container");
         ladder.outerHTML = ladder.innerHTML;
         return;
     }
     if (document.getElementsByClassName("ladder-container").length > 0) {
         return;
     }
-    var ladder = document.querySelector(".caption-top");
+    ladder = document.querySelector(".caption-top");
     var ladderParent = ladder.parentElement;
     var ladderContainer = document.createElement("div");
     ladderContainer.className = "ladder-container";
@@ -414,15 +413,52 @@ function expandLadder(enabled) {
     ladderContainer.appendChild(ladder);
 }
 
-addJS_Node(secondsToHms);
-addJS_Node(solveQuadratic);
-addJS_Node(expandLadder);
-addJS_Node(setLadderRows);
-addJS_Node(getAcc);
-// Overwrite original functions
-addJS_Node(showButtons);
-addJS_Node(updateLadder);
-addJS_Node(writeNewRow);
+window.addOption = function(optionElement) {
+    $("#offcanvasOptions").children(".offcanvas-body")[0].appendChild(optionElement);
+}
+
+window.addOptionDevider = function() {
+    var optionElement = document.createElement("hr");
+    addOption(optionElement);
+}
+
+window.addNewSection = function(name) {
+    addOptionDevider();
+    var optionElement = document.createElement("h4");
+    optionElement.innerHTML = name;
+    addOption(optionElement);
+}
+
+window.baseOptionDiv = function(content = "") {
+    var newDiv = document.createElement("div");
+    newDiv.style = "display: block; padding: 0.5rem; font-size:1.25rem"
+    newDiv.innerHTML = content;
+    return newDiv;
+}
+
+window.SelectOption = function(title, id, values) {
+    //values is an array of objects with display and value properties
+    return baseOptionDiv
+    (`<span>${title}</span>
+      <select name="fonts" id="${id}" class="form-select">
+            ${values.map(function(value) {
+                return `<option value="${value.value}">${value.display}</option>`
+            }).join("")}
+      </select>`);
+}
+
+window.TextInputOption = function(title, id, placeholder, maxlength, onclick) {
+    return baseOptionDiv
+    (`<span>${title}</span>
+      <div class="input-group">
+         <input class="form-control shadow-none" id="${id}" maxlength="${maxlength}" placeholder="${placeholder}" type="text">
+         <button class="btn btn-primary shadow-none" id="rowsButton" onclick="${onclick}">Set</button>
+      </div>`);
+}
+
+window.CheckboxOption = function(title, optionID, defaultChecked=false) {
+    return baseOptionDiv(`<input type="checkbox" ${defaultChecked?"checked='checked'" : ""} id="${optionID}"><span style="padding: 10px">${title}</span>`);
+}
 
 // Holy crap this took me way too long
 $(".navbar-toggler")[0].style['border-color'] = "rgba(0,0,0,0.5)";
@@ -431,60 +467,49 @@ $(`<button aria-controls="offcanvasNavbar" class="navbar-toggler" data-bs-target
 $("#offcanvasNavbar").clone().attr("id", "offcanvasOptions").width("400px").insertAfter("#offcanvasNavbar");
 $("#offcanvasOptions").children(".offcanvas-header").children("#offcanvasNavbarLabel").html("Options");
 $("#offcanvasOptions").children(".offcanvas-body").children().remove();
-$("#offcanvasOptions").children(".offcanvas-body").html(`<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Font</span><select name="fonts" id="ladderFonts" class="form-select">
-                        <option value="">Default</option>
-                        <option value="BenchNine">BenchNine</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Lato">Lato</option>
-                        </select></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Ladder Rows</span><div class="input-group"><input class="form-control shadow-none" id="rowsInput" maxlength="4" placeholder="# of rows, min 10, default 30" type="text"><button class="btn btn-primary shadow-none" id="rowsButton" onclick="setLadderRows()">Set</button></div></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollableLadder"><span style="padding: 10px">Full scrollable ladder</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="expandLadderSize"><span style="padding: 10px">Expand ladder size</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="keybinds"><span style="padding: 10px">Keybinds</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="printFillerRows"><span style="padding: 10px">Append filler rankers</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="scrollablePage"><span style="padding: 10px">Make page scrollable</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><input type="checkbox" id="promotePoints"><span style="padding: 10px">Show points for promotion</span></div>`+
-                        `<div style="display: block; padding: 0.5rem; font-size:1.25rem"><span>Leader Multi Requirement</span><select name="selector1" id="leadermultimode" class="form-select">
-                        <option value="Both">[524288 x🟩]</option>
-                        <option value="Square">[x🟩 / x🟥]</option>
-                        <option value="Number">[524288]</option>
-                        <option value="Disabled">Disabled</option>
-                        </select></div>`);
 
-if (qolOptions.expandedLadder.enabled) { $("#expandLadderSize").attr("checked", "checked"); }
-if (qolOptions.keybinds) { $("#keybinds").attr("checked", "checked"); }
-if (qolOptions.printFillerRows) { $("#printFillerRows").attr("checked", "checked"); }
-if (qolOptions.scrollablePage) {
-    $("#scrollablePage").attr("checked", "checked");
-    document.body.style.removeProperty('overflow-y');
-}
-if (qolOptions.promotePoints) {
-    $("#promotePoints").attr("checked", "checked");
-}
-if (qolOptions.scrollableLadder) {
-    $("#scrollableLadder").attr("checked", "checked");
-    expandLadder(true)
-}
+addOption(SelectOption("Ladder Font", "ladderFonts", [
+    {display: "Default", value: ""},
+    {display: "BenchNine", value: "BenchNine"},
+    {display: "Roboto", value: "Roboto"},
+    {display: "Lato", value: "Lato"},
+]))
+addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4", "setLadderRows()"))
+addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder", qolOptions.scrollableLadder))
+addOption(CheckboxOption("Expand ladder size", "expandedLadder", qolOptions.expandedLadder.enabled))
+addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
+addOption(CheckboxOption("Make page scrollable", "scrollablePage", qolOptions.scrollablePage))
+addOption(CheckboxOption("Show points for promotion", "promotePoints", qolOptions.promotePoints))
+addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
+    {display: "[524288 x🟩]", value: "Both"},
+    {display: "[x🟩 / x🟥]", value: "Square"},
+    {display: "[524288]", value: "Number"},
+    {display: "Disabled", value: "Disabled"},
+]))
+
+if (qolOptions.scrollablePage) document.body.style.removeProperty('overflow-y');
+if (qolOptions.scrollableLadder) expandLadder(true)
+
 $("#leadermultimode")[0].value = qolOptions.multiLeader["default"]
 
-$("#expandLadderSize")[0].addEventListener("change", (event)=>{
-    if ($("#expandLadderSize")[0].checked) {
-        qolOptions.expandedLadder.enabled = true;
+$("#expandedLadder")[0].addEventListener("change", (event)=>{
+    let boxChecked = $("#expandedLadder")[0].checked;
+    qolOptions.expandedLadder.enabled = boxChecked;
+    if (boxChecked) {
         $('#infoText').parent().parent().removeClass('col-7').addClass('col-12');
         $('#infoText').parent().parent().next().hide();
     } else {
-        qolOptions.expandedLadder.enabled = false;
         $('#infoText').parent().parent().addClass('col-7').removeClass('col-12');
         $('#infoText').parent().parent().next().show();
     }
 });
 
 $("#scrollablePage")[0].addEventListener("change", (event)=>{
-    if ($("#scrollablePage")[0].checked) {
-        qolOptions.scrollablePage = true;
+    let boxChecked = $("#scrollablePage")[0].checked;
+    qolOptions.scrollablePage = boxChecked;
+    if (boxChecked) {
         document.body.style.removeProperty('overflow-y');
     } else {
-        qolOptions.scrollablePage = false;
         document.body.style.setProperty('overflow-y', 'hidden');
     }
 });
@@ -508,7 +533,6 @@ function updateOptions(id, option) {
 }
 
 updateOptions('keybinds','keybinds');
-updateOptions('printFillerRows','printFillerRows');
 updateOptions('promotePoints','promotePoints');
 
 var linkTag = document.createElement('link');
