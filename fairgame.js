@@ -14,8 +14,7 @@
 // @license      MIT
 // ==/UserScript==
 
-// Script made and maintained by aqualxx#5004! 👍
-// With a few tweaks by Tree#1019 and people from the game discord server
+// Script made by aqualxx#5004 and maintained by Lynn#6969
 
 // Features include:
 // Larger ladder size
@@ -55,6 +54,15 @@ window.qolOptions = {
 //////////////////////////////////////
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
+
+window.subscribeToDomNode = function(id, callback) {
+    let input = $("#"+id)[0];
+    if (input) {
+        input.addEventListener("change", callback);
+    } else {
+        console.log(`Id ${id} was not found subscribing to change events`);
+    }
+}
 
 document.addEventListener("keyup", event => {
     if (!qolOptions.keybinds) return;
@@ -391,7 +399,7 @@ window.setLadderRows = function() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
-function expandLadder(enabled) {
+window.expandLadder = function(enabled) {
     var ladder;
     if (!enabled) {
         ladder = document.querySelector(".ladder-container");
@@ -436,6 +444,37 @@ window.baseOptionDiv = function(content = "") {
     return newDiv;
 }
 
+window.ButtonOption = function(name, id) {
+    var newDiv = baseOptionDiv();
+    var button = document.createElement("button");
+    button.className = "btn btn-primary";
+    button.innerHTML = name;
+    button.id = id;
+    newDiv.appendChild(button);
+    return newDiv;
+}
+
+window.SliderOption = function(name, id, min, max, step, value) {
+    var newDiv = baseOptionDiv();
+    var slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+    slider.value = value;
+    slider.style = "width: 100%";
+    slider.id = id;
+    var sliderLabel = document.createElement("label");
+    slider.oninput = function() {
+        sliderLabel.innerHTML = name + ": " + slider.value;
+    }
+    sliderLabel.innerHTML = name + ": " + slider.value;
+    newDiv.appendChild(sliderLabel);
+    newDiv.appendChild(slider);
+    return newDiv;
+}
+
+
 window.SelectOption = function(title, id, values) {
     //values is an array of objects with display and value properties
     return baseOptionDiv
@@ -477,7 +516,7 @@ addOption(SelectOption("Ladder Font", "ladderFonts", [
 addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4", "setLadderRows()"))
 addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder", qolOptions.scrollableLadder))
 addOption(CheckboxOption("Expand ladder size", "expandedLadder", qolOptions.expandedLadder.enabled))
-addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
+//addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
 addOption(CheckboxOption("Make page scrollable", "scrollablePage", qolOptions.scrollablePage))
 addOption(CheckboxOption("Show points for promotion", "promotePoints", qolOptions.promotePoints))
 addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
@@ -532,7 +571,6 @@ function updateOptions(id, option) {
     }
 }
 
-updateOptions('keybinds','keybinds');
 updateOptions('promotePoints','promotePoints');
 
 var linkTag = document.createElement('link');
