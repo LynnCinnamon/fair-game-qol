@@ -399,17 +399,19 @@ window.setLadderRows = function() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
-window.expandLadder = function(enabled) {
-    var ladder;
-    if (!enabled) {
-        ladder = document.querySelector(".ladder-container");
+window.expandLadder(enabled) {
+    var ladder = document.querySelector(".ladder-container");
+    if (!enabled && ladder) {
         ladder.outerHTML = ladder.innerHTML;
         return;
     }
     if (document.getElementsByClassName("ladder-container").length > 0) {
         return;
     }
-    ladder = document.querySelector(".caption-top");
+    if(!enabled) {
+        return;
+    }
+    var ladder = document.querySelector(".caption-top");
     var ladderParent = ladder.parentElement;
     var ladderContainer = document.createElement("div");
     ladderContainer.className = "ladder-container";
