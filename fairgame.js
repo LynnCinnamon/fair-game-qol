@@ -444,17 +444,18 @@ window.baseOptionDiv = function(content = "") {
     return newDiv;
 }
 
-window.ButtonOption = function(name, onClick) {
+window.ButtonOption = function(name, id) {
     var newDiv = baseOptionDiv();
     var button = document.createElement("button");
     button.className = "btn btn-primary";
     button.innerHTML = name;
+    button.id = id;
     button.onclick = onClick;
     newDiv.appendChild(button);
     return newDiv;
 }
 
-window.SliderOption = function(name, min, max, step, value) {
+window.SliderOption = function(name, id, min, max, step, value) {
     var newDiv = baseOptionDiv();
     var slider = document.createElement("input");
     slider.type = "range";
@@ -463,6 +464,7 @@ window.SliderOption = function(name, min, max, step, value) {
     slider.step = step;
     slider.value = value;
     slider.style = "width: 100%";
+    slider.id = id;
     var sliderLabel = document.createElement("label");
     slider.oninput = function() {
         sliderLabel.innerHTML = name + ": " + slider.value;
