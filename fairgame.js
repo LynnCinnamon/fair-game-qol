@@ -399,7 +399,7 @@ window.setLadderRows = function() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
-function expandLadder(enabled) {
+window.expandLadder = function(enabled) {
     var ladder;
     if (!enabled) {
         ladder = document.querySelector(".ladder-container");
@@ -485,7 +485,7 @@ addOption(SelectOption("Ladder Font", "ladderFonts", [
 addOption(TextInputOption("Ladder Rows", "rowsInput", "# of rows, min 10, default 30", "4", "setLadderRows()"))
 addOption(CheckboxOption("Full scrollable ladder", "scrollableLadder", qolOptions.scrollableLadder))
 addOption(CheckboxOption("Expand ladder size", "expandedLadder", qolOptions.expandedLadder.enabled))
-addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
+//addOption(CheckboxOption("Keybinds", "keybinds", qolOptions.keybinds))
 addOption(CheckboxOption("Make page scrollable", "scrollablePage", qolOptions.scrollablePage))
 addOption(CheckboxOption("Show points for promotion", "promotePoints", qolOptions.promotePoints))
 addOption(SelectOption("Leader Multi Requirement", "leadermultimode", [
@@ -540,7 +540,6 @@ function updateOptions(id, option) {
     }
 }
 
-updateOptions('keybinds','keybinds');
 updateOptions('promotePoints','promotePoints');
 
 var linkTag = document.createElement('link');
