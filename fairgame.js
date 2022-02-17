@@ -450,7 +450,6 @@ window.ButtonOption = function(name, id) {
     button.className = "btn btn-primary";
     button.innerHTML = name;
     button.id = id;
-    button.onclick = onClick;
     newDiv.appendChild(button);
     return newDiv;
 }
