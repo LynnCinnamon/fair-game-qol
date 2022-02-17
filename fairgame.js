@@ -399,7 +399,7 @@ window.setLadderRows = function() {
     clientData.ladderPadding = qolOptions.expandedLadder.size / 2;
 }
 
-window.expandLadder(enabled) {
+window.expandLadder = function(enabled) {
     var ladder = document.querySelector(".ladder-container");
     if (!enabled && ladder) {
         ladder.outerHTML = ladder.innerHTML;
