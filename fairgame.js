@@ -56,6 +56,15 @@ window.qolOptions = {
 //      DO NOT EDIT BEYOND HERE     //
 //////////////////////////////////////
 
+window.subscribeToDomNode = function(id, callback) {
+    let input = $("#"+id)[0];
+    if (input) {
+        input.addEventListener("change", callback);
+    } else {
+        console.log(`Id ${id} was not found subscribing to change events`);
+    }
+}
+
 document.addEventListener("keyup", event => {
     if (!qolOptions.keybinds) return;
     if (!event.target.isEqualNode($("body")[0])) return;
