@@ -444,6 +444,36 @@ window.baseOptionDiv = function(content = "") {
     return newDiv;
 }
 
+window.ButtonOption = function(name, onClick) {
+    var newDiv = baseOptionDiv();
+    var button = document.createElement("button");
+    button.className = "btn btn-primary";
+    button.innerHTML = name;
+    button.onclick = onClick;
+    newDiv.appendChild(button);
+    return newDiv;
+}
+
+window.SliderOption = function(name, min, max, step, value) {
+    var newDiv = baseOptionDiv();
+    var slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+    slider.value = value;
+    slider.style = "width: 100%";
+    var sliderLabel = document.createElement("label");
+    slider.oninput = function() {
+        sliderLabel.innerHTML = name + ": " + slider.value;
+    }
+    sliderLabel.innerHTML = name + ": " + slider.value;
+    newDiv.appendChild(sliderLabel);
+    newDiv.appendChild(slider);
+    return newDiv;
+}
+
+
 window.SelectOption = function(title, id, values) {
     //values is an array of objects with display and value properties
     return baseOptionDiv
