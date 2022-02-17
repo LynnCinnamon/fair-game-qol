@@ -14,8 +14,7 @@
 // @license      MIT
 // ==/UserScript==
 
-// Script made and maintained by aqualxx#5004! 👍
-// With a few tweaks by Tree#1019 and people from the game discord server
+// Script made by aqualxx#5004 and maintained by Lynn#6969
 
 // Features include:
 // Larger ladder size
