@@ -89,12 +89,15 @@ const RankerColors = {
 //////////////////////////////////////
 
 /* Global variables */
+// General variables
 let pointsForPromote;
 
+// Tick lengths
 let tickTimes = [];
 const ticksToCount = 10;
 let averageTickTime = 1.0;
 
+// General simulation
 // key rankerAccountId, value {time: timeToOneOrLadderPointsInSeconds, order: orderToOneOrLadderPointsFrom#1, approximate: boolean}}
 let timeToOneMap = new Map();
 // key rankerAccountId, value {time: timeToYouInSeconds, order: orderToYou, approximate: boolean}}
@@ -103,9 +106,17 @@ let timeSimulated = 0;
 let simulationFinished = false;
 let simulatedLadderData;
 
-let nextMultiTime;
+// Bias/mult simulation
+let biasAffordTime;
+let biasAffordExact = false;
+let biasAffordLastStepTime = 0;
+let biasAffordLastYourRanker;
+let multiAffordTime;
+let multiAffordExact = false;
+let multiAffordLastStepTime = 0;
+let multiAffordLastYourRanker;
+
 let nextMultiPayback;
-let nextBiasTime;
 let nextBiasPayback;
 
 
@@ -658,25 +669,35 @@ window.updateBiasMulti = function() {
     const biasCost = getUpgradeCost(ladderData.yourRanker.bias + 1);
     const multiCost = getUpgradeCost(ladderData.yourRanker.multiplier + 1);
     const myAcc = getAcceleration(ladderData.yourRanker);
+    const yourSimulatedRanker = simulatedLadderData.rankers.filter(obj => obj.you)[0];
 
-    nextMultiTime = ladderData.yourRanker.power.lessThan(multiCost) ? (multiCost - ladderData.yourRanker.power) / myAcc : 0;
+    // Bias affordability
+    if (!biasAffordExact) {
+        const timeRemainingTilBiasAfford = solveQuadratic(getAcceleration(yourSimulatedRanker) / 2, yourSimulatedRanker.power, yourSimulatedRanker.points - biasCost);
+        biasAffordTime = timeSimulated + timeRemainingTilBiasAfford;
+    }
+    // Multi affordability
+    if (!multiAffordExact) {
+        const timeRemainingTilMultiAfford = (multiCost - yourSimulatedRanker.power) / getAcceleration(yourSimulatedRanker);
+        multiAffordTime = timeSimulated + timeRemainingTilMultiAfford;
+    }
+
     // Payback is the time it takes for the difference between new and old growth functions to gain current points.
     // Rank changes are not taken into account so this estimate is conservative.
     // For multi payback you will need to solve accel_diff / 2 * t^2 - power * t - points = 0
     nextMultiPayback = 0;
-    if (nextMultiTime > 0) {
+    if (multiAffordTime > 0) {
         // If you don't have the required power calculate cost with future values
-        const targetPoints = ladderData.yourRanker.points.add(ladderData.yourRanker.power.times(nextMultiTime)).add(myAcc * myAcc * nextMultiTime / 2);
+        const targetPoints = ladderData.yourRanker.points.add(ladderData.yourRanker.power.times(multiAffordTime)).add(myAcc * myAcc * multiAffordTime / 2);
         nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias) / 2, -multiCost, -targetPoints);
     }
     else {
         nextMultiPayback = solveQuadratic((ladderData.yourRanker.rank - 1 + ladderData.yourRanker.bias) / 2, -ladderData.yourRanker.power, -ladderData.yourRanker.points);
     }
 
-    nextBiasTime = ladderData.yourRanker.points.lessThan(biasCost) ? solveQuadratic(myAcc / 2, ladderData.yourRanker.power, ladderData.yourRanker.points.sub(biasCost)) : 0;
     // For bias payback you will need to solve accel_diff / 2 * t^2 - points = 0
     nextBiasPayback = 0;
-    if (nextBiasTime > 0) {
+    if (biasAffordTime > 0) {
         // If you don't have the required points calculate cost with future value
         nextBiasPayback = solveQuadratic(ladderData.yourRanker.multiplier / 2, 0, -biasCost);
     }
@@ -705,10 +726,12 @@ window.showButtons = function() {
         multiButton.prop("disabled", true);
     }
 
-    $('#biasTooltip').attr('data-bs-original-title', `${secondsToHms(nextBiasTime)}/${secondsToHms(nextBiasPayback)} ` + numberFormatter.format(biasCost) + ' Points');
-    biasButton.html(`+1 Bias<br>Cost: ${numberFormatter.format(biasCost)} Points<br>Afford in: ${secondsToHms(nextBiasTime)}<br>Payback: ${secondsToHms(nextBiasPayback)}`);
-    $('#multiTooltip').attr('data-bs-original-title', `${secondsToHms(nextMultiTime)}/${secondsToHms(nextMultiPayback)} ` + numberFormatter.format(multiCost) + ' Power');
-    multiButton.html(`+1 Multi<br>Cost: ${numberFormatter.format(multiCost)} Power<br>Afford in: ${secondsToHms(nextMultiTime)}<br>Payback: ${secondsToHms(nextMultiPayback)}`);
+    $('#biasTooltip').attr('data-bs-original-title', numberFormatter.format(biasCost) + ' Points');
+    $('#multiTooltip').attr('data-bs-original-title', numberFormatter.format(multiCost) + ' Power');
+    const biasAffordString = `${(biasAffordExact ? "" : "<i>") + secondsToHms(biasAffordTime) + (biasAffordExact ? "" : "</i>")}`;
+    const multiAffordString = `${(multiAffordExact ? "" : "<i>") + secondsToHms(multiAffordTime) + (multiAffordExact ? "" : "</i>")}`;
+    biasButton.html(`+1 Bias<br>Afford in: ${biasAffordString}<br>Payback: ${secondsToHms(nextBiasPayback)}`);
+    multiButton.html(`+1 Multi<br>Afford in: ${multiAffordString}<br>Payback: ${secondsToHms(nextMultiPayback)}`);
 
     // Update Simulate button with simulated time
     $("#simulateButton").html(`Simulate<br>Took ${secondsToHms(timeSimulated)}<br>Finished? ${simulationFinished ? "🟩" : "🟥"}`);
@@ -838,6 +861,24 @@ function runSimulation(printOut) {
     let loops = 0;
     timeSimulated = 0;
     simulationFinished = false;
+    let hitBiasAfford = false;
+    biasAffordTime = 0;
+    biasAffordExact = false;
+    biasAffordLastStepTime = 0;
+    biasAffordLastYourRanker = jQuery.extend(true, {}, ladderData.yourRanker);
+    if (ladderData.yourRanker.points.cmp(getUpgradeCost(ladderData.yourRanker.bias + 1)) >= 0) {
+        hitBiasAfford = true;
+        biasAffordExact = true;
+    }
+    let hitMultiAfford = false;
+    multiAffordTime = 0;
+    multiAffordExact = false;
+    multiAffordLastStepTime = 0;
+    multiAffordLastYourRanker = jQuery.extend(true, {}, ladderData.yourRanker);
+    if (ladderData.yourRanker.power.cmp(getUpgradeCost(ladderData.yourRanker.multiplier + 1)) >= 0) {
+        hitMultiAfford = true;
+        multiAffordExact = true;
+    }
     let numberHitOne = 0;
     let numberHitYou = 0;
     const simulationBehavior = SimulationBehaviors[$("#simulationBehavior")[0].value];
@@ -928,7 +969,7 @@ function runSimulation(printOut) {
         // Move ranker array around
         simulatedLadderData.rankers = reverseInsertionSort(simulatedLadderData.rankers);
 
-        // Update ranks and set Time to You map
+        // Update ranks and set Time to You map and Bias/Mult afford times
         /* Uses same sign as timeToYouSigns map: -1 indicates ranker is before you, 1 indicates ranker is after you
         Usage of variable prevents another unnecessary for-loop
         If the signs don't match up, this means you passed them or they passed you */
@@ -937,6 +978,30 @@ function runSimulation(printOut) {
             ranker.rank = index + 1;
             if (ranker.you) {
                 rankerComparisonSign = 1;
+                // Bias affordability
+                const biasCost = getUpgradeCost(ranker.bias + 1);
+                if (ranker.points >= biasCost && !hitBiasAfford) {
+                    const timeRemainingTilBiasAfford = solveQuadratic(getAcceleration(biasAffordLastYourRanker) / 2, biasAffordLastYourRanker.power, biasAffordLastYourRanker.points - biasCost);
+                    hitBiasAfford = true;
+                    biasAffordExact = true;
+                    biasAffordTime = biasAffordLastStepTime + timeRemainingTilBiasAfford;
+                }
+                else {
+                    biasAffordLastStepTime = timeSimulated;
+                    biasAffordLastYourRanker = jQuery.extend(true, {}, ranker);
+                }
+                // Multi affordability
+                const multiCost = getUpgradeCost(ranker.multiplier + 1);
+                if (ranker.power >= multiCost && !hitMultiAfford) {
+                    const timeRemainingTilMultiAfford = (multiCost - multiAffordLastYourRanker.power) / getAcceleration(multiAffordLastYourRanker);
+                    hitMultiAfford = true;
+                    multiAffordExact = true;
+                    multiAffordTime = multiAffordLastStepTime + timeRemainingTilMultiAfford;
+                }
+                else {
+                    multiAffordLastStepTime = timeSimulated;
+                    multiAffordLastYourRanker = jQuery.extend(true, {}, ranker);
+                }
             }
             else if (!timeToYouMap.has(ranker.accountId) && timeToYouSigns.get(ranker.accountId) !== rankerComparisonSign) {
                 timeToYouMap.set(ranker.accountId, {time: timeSimulated, order: ++numberHitYou, approximate: false});
